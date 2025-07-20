@@ -10,24 +10,42 @@ except ImportError:  # fallback to bundled simple parser
         if hasattr(src, 'read'):
             src = src.name
         return yaml.load(src)
+import os
 from ipaddress import ip_network, ip_address
 from .model import Node, Interface, Route
 
 
-def load_topology(path):
-    """Load topology from YAML file and validate it."""
-    data = _safe_load(path)
-    nodes = {}
-    for name, ndata in (data.get('nodes') or {}).items():
+def _parse_nodes(data, nodes, source):
+    for name, ndata in (data.get("nodes") or {}).items():
+        if name in nodes:
+            raise ValueError(f"Duplicate node {name} in {source}")
         node = Node(name)
-        for idef in ndata.get('interfaces', []):
-            net = ip_network(idef['network'], strict=False)
-            node.interfaces.append(Interface(idef['name'], net))
-        for rdef in ndata.get('routes', []):
+        for idef in ndata.get("interfaces", []):
+            net = ip_network(idef["network"], strict=False)
+            node.interfaces.append(Interface(idef["name"], net))
+        for rdef in ndata.get("routes", []):
             node.routes.append(
-                Route(ip_network(rdef['prefix'], strict=False), rdef.get('via'))
+                Route(ip_network(rdef["prefix"], strict=False), rdef.get("via"))
             )
         nodes[name] = node
+
+
+def load_topology(path):
+    """Load topology from YAML file or directory and validate it."""
+    if os.path.isdir(path):
+        files = [
+            os.path.join(path, f)
+            for f in sorted(os.listdir(path))
+            if f.endswith((".yaml", ".yml"))
+        ]
+    else:
+        files = [path]
+
+    nodes = {}
+    for fname in files:
+        data = _safe_load(fname) or {}
+        _parse_nodes(data, nodes, fname)
+
     validate(nodes)
     return nodes
 
