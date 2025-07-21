@@ -1,5 +1,6 @@
 import os
 import sys
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -69,4 +70,56 @@ def test_load_with_pyyaml(monkeypatch, tmp_path):
 
     assert captured['type'] is not str
     assert set(nodes) == {'X'}
+
+
+def test_gateway_must_be_reachable(tmp_path):
+    import importlib
+    from netbagger import topology
+
+    importlib.reload(topology)
+
+    cfg = tmp_path / "topo.yaml"
+    cfg.write_text(
+        """
+        nodes:
+          R1:
+            interfaces:
+              - name: net1
+                network: 10.0.0.1/24
+            routes:
+              - prefix: 0.0.0.0/0
+                via: 10.0.1.2
+          R2:
+            interfaces:
+              - name: net2
+                network: 10.0.1.2/24
+        """
+    )
+
+    with pytest.raises(ValueError):
+        topology.load_topology(str(cfg))
+
+
+def test_gateway_on_same_network(tmp_path):
+    import importlib
+    from netbagger import topology
+
+    importlib.reload(topology)
+
+    cfg = tmp_path / "topo.yaml"
+    cfg.write_text(
+        """
+        nodes:
+          R1:
+            interfaces:
+              - name: net1
+                network: 10.0.0.1/24
+            routes:
+              - prefix: 0.0.0.0/0
+                via: 10.0.0.1
+        """
+    )
+
+    nodes = topology.load_topology(str(cfg))
+    assert set(nodes) == {"R1"}
 

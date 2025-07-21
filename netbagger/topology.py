@@ -75,8 +75,14 @@ def validate(nodes):
 
     for node in nodes.values():
         for route in node.routes:
-            if route.via and not find_node_for_ip(route.via):
-                raise ValueError(
-                    f"Route {route.prefix} via {route.via} on {node.name} has unknown next-hop"
-                )
+            if route.via:
+                if not find_node_for_ip(route.via):
+                    raise ValueError(
+                        f"Route {route.prefix} via {route.via} on {node.name} has unknown next-hop"
+                    )
+                via_ip = ip_address(route.via)
+                if not any(via_ip in iface.network for iface in node.interfaces):
+                    raise ValueError(
+                        f"Route {route.prefix} via {route.via} on {node.name} is unreachable"
+                    )
 
