@@ -47,3 +47,13 @@ python -m netbagger.cli simulate example-topology/r1.yaml 192.0.2.1 198.51.100.1
 python -m netbagger.cli simulate example-topology/ 192.0.2.1 198.51.100.1
 ```
 
+### Visualizing a topology
+
+Generate a simple SVG diagram for a topology file or directory:
+
+```
+python -m netbagger.cli visualize example-topology/ -o topo.svg
+```
+
+The resulting `topo.svg` can be viewed in any web browser.
+
