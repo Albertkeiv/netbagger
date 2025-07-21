@@ -24,7 +24,7 @@ def find_node_for_ip(nodes: Dict[str, Node], ip: str) -> Node:
     found = None
     for node in nodes.values():
         for iface in node.interfaces:
-            if ip in iface.network:
+            if ip == iface.ip.ip:
                 if found:
                     raise ValueError(f"IP {ip} is present on multiple nodes")
                 found = node
@@ -55,7 +55,7 @@ def simulate(nodes: Dict[str, Node], src_ip: str, dst_ip: str, ecmp: bool = Fals
     for _ in range(max_steps):
         # local delivery check
         for iface in current.interfaces:
-            if dst_ip_obj in iface.network:
+            if dst_ip_obj in iface.ip.network:
                 steps.append(Step(current.name, f"deliver to {dst_ip}"))
                 return Result.DELIVERED, steps
 

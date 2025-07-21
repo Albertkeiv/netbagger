@@ -20,7 +20,7 @@ def test_load_single_file(tmp_path):
     )
     nodes = load_topology(str(cfg))
     assert set(nodes) == {"R1"}
-    assert str(nodes["R1"].interfaces[0].network) == "10.0.0.0/24"
+    assert str(nodes["R1"].interfaces[0].ip.network) == "10.0.0.0/24"
 
 
 def test_load_directory(tmp_path):
@@ -122,4 +122,44 @@ def test_gateway_on_same_network(tmp_path):
 
     nodes = topology.load_topology(str(cfg))
     assert set(nodes) == {"R1"}
+
+
+def test_hosts_can_share_network(tmp_path):
+    cfg = tmp_path / "topo.yaml"
+    cfg.write_text(
+        """
+        nodes:
+          R1:
+            interfaces:
+              - name: net1
+                network: 10.0.0.1/24
+          R2:
+            interfaces:
+              - name: net1
+                network: 10.0.0.2/24
+        """
+    )
+
+    nodes = load_topology(str(cfg))
+    assert set(nodes) == {"R1", "R2"}
+
+
+def test_partial_overlap_error(tmp_path):
+    cfg = tmp_path / "topo.yaml"
+    cfg.write_text(
+        """
+        nodes:
+          R1:
+            interfaces:
+              - name: net1
+                network: 10.0.0.1/24
+          R2:
+            interfaces:
+              - name: net1
+                network: 10.0.0.128/25
+        """
+    )
+
+    with pytest.raises(ValueError):
+        load_topology(str(cfg))
 

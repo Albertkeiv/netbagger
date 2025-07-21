@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
-from ipaddress import IPv4Network
+from ipaddress import IPv4Interface, IPv4Network
 from typing import List, Optional
 
 @dataclass
 class Interface:
     name: str
-    network: IPv4Network
+    ip: IPv4Interface
 
 @dataclass
 class Route:
