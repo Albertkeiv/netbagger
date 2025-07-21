@@ -7,6 +7,14 @@ Topology may be provided as a single file or as a directory containing
 multiple `*.yaml` files. When a directory is supplied, all YAML files in that
 directory are merged.
 
+## Installation
+
+Install dependencies from `requirements.txt`:
+
+```
+pip install -r requirements.txt
+```
+
 ### Example with a single topology file
 
 ```
