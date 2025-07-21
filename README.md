@@ -7,7 +7,15 @@ Topology may be provided as a single file or as a directory containing
 multiple `*.yaml` files. When a directory is supplied, all YAML files in that
 directory are merged.
 
+### Example with a single topology file
+
 ```
-python -m netbagger.cli simulate topology.yaml 192.0.2.1 198.51.100.1
+python -m netbagger.cli simulate example-topology/r1.yaml 192.0.2.1 198.51.100.1
+```
+
+### Example with a directory of topology files
+
+```
+python -m netbagger.cli simulate example-topology/ 192.0.2.1 198.51.100.1
 ```
 
