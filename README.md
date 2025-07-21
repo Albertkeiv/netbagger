@@ -2,6 +2,8 @@
 
 A simple network path simulator. Topology is described in YAML format and the
 `simulate` command shows how a packet would travel from source to destination.
+Each hop in the output also indicates the interface the packet left from and
+the interface it arrived on.
 
 Topology may be provided as a single file or as a directory containing
 multiple `*.yaml` files. When a directory is supplied, all YAML files in that

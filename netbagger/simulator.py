@@ -56,7 +56,7 @@ def simulate(nodes: Dict[str, Node], src_ip: str, dst_ip: str, ecmp: bool = Fals
         # local delivery check
         for iface in current.interfaces:
             if dst_ip_obj in iface.ip.network:
-                steps.append(Step(current.name, f"deliver to {dst_ip}"))
+                steps.append(Step(current.name, f"deliver to {dst_ip} on {iface.name}"))
                 return Result.DELIVERED, steps
 
         candidates = lpm(current.routes, dst_ip_obj)
@@ -85,7 +85,26 @@ def simulate(nodes: Dict[str, Node], src_ip: str, dst_ip: str, ecmp: bool = Fals
             if not next_node:
                 steps.append(Step(current.name, f'no next hop {route.via}'))
                 return Result.UNREACHABLE, steps
-            steps.append(Step(current.name, f'via {route.via} -> {next_node.name}'))
+
+            via_ip = ip_address(route.via)
+            out_iface = None
+            for iface in current.interfaces:
+                if via_ip in iface.ip.network:
+                    out_iface = iface.name
+                    break
+
+            in_iface = None
+            for iface in next_node.interfaces:
+                if via_ip == iface.ip.ip:
+                    in_iface = iface.name
+                    break
+
+            steps.append(
+                Step(
+                    current.name,
+                    f'via {route.via} out {out_iface} -> {next_node.name} in {in_iface}',
+                )
+            )
             current = next_node
             break
     steps.append(Step(current.name, 'max steps exceeded'))
