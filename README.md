@@ -7,6 +7,24 @@ Topology may be provided as a single file or as a directory containing
 multiple `*.yaml` files. When a directory is supplied, all YAML files in that
 directory are merged.
 
+Multiple nodes may use addresses from the same network. Only partially
+overlapping prefixes (for example `10.0.0.0/24` and `10.0.0.0/25`) are
+disallowed and produce a `Network overlap` error during loading.
+
+Valid example with two nodes on a shared subnet:
+
+```yaml
+nodes:
+  R1:
+    interfaces:
+      - name: net1
+        network: 10.0.0.1/24
+  R2:
+    interfaces:
+      - name: net1
+        network: 10.0.0.2/24
+```
+
 ## Installation
 
 Install dependencies from `requirements.txt`:

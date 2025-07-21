@@ -14,7 +14,7 @@ except ImportError:  # fallback to bundled simple parser
             src = src.name
         return yaml.load(src)
 import os
-from ipaddress import ip_network, ip_address
+from ipaddress import ip_address, ip_interface, ip_network
 from .model import Node, Interface, Route
 
 
@@ -24,8 +24,8 @@ def _parse_nodes(data, nodes, source):
             raise ValueError(f"Duplicate node {name} in {source}")
         node = Node(name)
         for idef in ndata.get("interfaces", []):
-            net = ip_network(idef["network"], strict=False)
-            node.interfaces.append(Interface(idef["name"], net))
+            iface = ip_interface(idef["network"])
+            node.interfaces.append(Interface(idef["name"], iface))
         for rdef in ndata.get("routes", []):
             node.routes.append(
                 Route(ip_network(rdef["prefix"], strict=False), rdef.get("via"))
@@ -58,18 +58,19 @@ def validate(nodes):
     nets = []
     for node in nodes.values():
         for iface in node.interfaces:
+            net = iface.ip.network
             for nname, nnet in nets:
-                if iface.network.overlaps(nnet):
+                if net.overlaps(nnet) and net != nnet:
                     raise ValueError(
-                        f"Network overlap: {iface.network} on {node.name} overlaps {nnet} on {nname}"
+                        f"Network overlap: {net} on {node.name} overlaps {nnet} on {nname}"
                     )
-            nets.append((node.name, iface.network))
+            nets.append((node.name, net))
 
     def find_node_for_ip(ip):
         ip = ip_address(ip)
         for n in nodes.values():
             for iface in n.interfaces:
-                if ip in iface.network:
+                if ip == iface.ip.ip:
                     return n
         return None
 
@@ -81,7 +82,7 @@ def validate(nodes):
                         f"Route {route.prefix} via {route.via} on {node.name} has unknown next-hop"
                     )
                 via_ip = ip_address(route.via)
-                if not any(via_ip in iface.network for iface in node.interfaces):
+                if not any(via_ip in iface.ip.network for iface in node.interfaces):
                     raise ValueError(
                         f"Route {route.prefix} via {route.via} on {node.name} is unreachable"
                     )
