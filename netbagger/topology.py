@@ -2,12 +2,15 @@ try:
     import yaml
 
     def _safe_load(src):
-        return yaml.safe_load(src)
+        if hasattr(src, "read"):
+            return yaml.safe_load(src)
+        with open(src) as f:
+            return yaml.safe_load(f)
 except ImportError:  # fallback to bundled simple parser
     from . import simpleyaml as yaml  # type: ignore
 
     def _safe_load(src):
-        if hasattr(src, 'read'):
+        if hasattr(src, "read"):
             src = src.name
         return yaml.load(src)
 import os

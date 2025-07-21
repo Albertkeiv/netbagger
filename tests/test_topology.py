@@ -45,3 +45,28 @@ def test_load_directory(tmp_path):
     nodes = load_topology(str(d))
     assert set(nodes) == {"A", "B"}
 
+
+def test_load_with_pyyaml(monkeypatch, tmp_path):
+    cfg = tmp_path / "conf.yaml"
+    cfg.write_text("nodes: {}\n")
+
+    captured = {}
+
+    def fake_safe_load(obj):
+        captured['type'] = type(obj)
+        return {'nodes': {'X': {}}}
+
+    import types, importlib
+    import sys
+
+    dummy_yaml = types.SimpleNamespace(safe_load=fake_safe_load)
+    monkeypatch.setitem(sys.modules, 'yaml', dummy_yaml)
+
+    from netbagger import topology as t
+    importlib.reload(t)
+
+    nodes = t.load_topology(str(cfg))
+
+    assert captured['type'] is not str
+    assert set(nodes) == {'X'}
+
