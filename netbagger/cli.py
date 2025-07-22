@@ -20,16 +20,24 @@ def main():
     args = parser.parse_args()
 
     if args.cmd == "simulate":
-        nodes = load_topology(args.topology)
-        res, steps = simulate(nodes, args.src, args.dst, args.ecmp)
-        for s in steps:
-            print(s)
-        print(res)
+        try:
+            nodes = load_topology(args.topology)
+            res, steps = simulate(nodes, args.src, args.dst, args.ecmp)
+            for s in steps:
+                print(s)
+            print(res)
+        except (ValueError, FileNotFoundError) as e:
+            print(f"Error: {e}")
+            exit(1)
     elif args.cmd == "visualize":
-        nodes = load_topology(args.topology)
-        from .visualize import visualize
-        path = visualize(nodes, args.output)
-        print(path)
+        try:
+            nodes = load_topology(args.topology)
+            from .visualize import visualize
+            path = visualize(nodes, args.output)
+            print(path)
+        except (ValueError, FileNotFoundError) as e:
+            print(f"Error: {e}")
+            exit(1)
     else:
         parser.print_help()
 
