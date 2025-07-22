@@ -35,6 +35,8 @@ def _parse_nodes(data, nodes, source):
 
 def load_topology(path):
     """Load topology from YAML file or directory and validate it."""
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Path does not exist: {path}")
     if os.path.isdir(path):
         files = [
             os.path.join(path, f)
@@ -46,8 +48,11 @@ def load_topology(path):
 
     nodes = {}
     for fname in files:
-        data = _safe_load(fname) or {}
-        _parse_nodes(data, nodes, fname)
+        try:
+            data = _safe_load(fname) or {}
+            _parse_nodes(data, nodes, fname)
+        except Exception as e:
+            raise ValueError(f"Error parsing {fname}: {e}")
 
     validate(nodes)
     return nodes

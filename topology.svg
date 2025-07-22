@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280">
+<line x1="260.0" y1="140.0" x2="260.0" y2="140.0" stroke="black" />
+<circle cx="260.0" cy="140.0" r="18" fill="lightgray" stroke="black" />
+<text x="260.0" y="140.0" font-size="12" text-anchor="middle" dominant-baseline="middle">R1</text>
+<circle cx="20.0" cy="140.0" r="18" fill="lightgray" stroke="black" />
+<text x="20.0" y="140.0" font-size="12" text-anchor="middle" dominant-baseline="middle">R2</text>
+</svg>
